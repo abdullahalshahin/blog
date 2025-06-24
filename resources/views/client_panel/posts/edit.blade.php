@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-client-layout>
     <x-slot name="page_title">{{ $page_title ?? 'Post Edit |' }}</x-slot>
 
     <div class="container-fluid">
@@ -8,8 +8,8 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('admin-panel/dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('admin-panel/posts') }}">Posts</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('client-panel/dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('client-panel/posts') }}">Posts</a></li>
                             <li class="breadcrumb-item active">Edit</li>
                         </ol>
                     </div>
@@ -70,7 +70,7 @@
                         </div>
 
                         <div class="page-aside-right">
-                            <form action="{{ url('admin-panel/posts', $post->id) }}" method="POST" enctype="multipart/form-data" id="post_form">
+                            <form action="{{ url('client-panel/posts', $post->id) }}" method="POST" enctype="multipart/form-data" id="post_form">
                                 @csrf
                                 @method('PUT')
 
@@ -129,7 +129,7 @@
                                         @if ($content->content_type === 'text')
                                             <div class="mb-3 col-md-12 dynamic-field" data-field-id="ckeditor_{{ $index }}">
                                                 <label for="ckeditor_{{ $index }}">CKEditor Content</label>
-                                                <textarea class="form-control" id="ckeditor_{{ $index }}" name="contents[ckeditor_{{ $index }}][data]" rows="5">{!! json_decode($content->data, true) !!}</textarea>
+                                                <textarea class="form-control" id="ckeditor_{{ $index }}" name="contents[ckeditor_{{ $index }}][data]" rows="5">{!! (json_decode($content->data, true)) !!}</textarea>
                                                 <input type="hidden" name="contents[ckeditor_{{ $index }}][content_type]" value="text">
                                                 <input type="hidden" name="contents[ckeditor_{{ $index }}][id]" value="{{ $content->id }}">
                                                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove</button>
@@ -142,17 +142,6 @@
                                         @elseif ($content->content_type === 'graph')
                                             <div class="mb-3 col-md-12 dynamic-field" data-field-id="chart_{{ $index }}">
                                                 <label>Graph Chart Input</label>
-                                                <div class="mb-2">
-                                                    <label for="chart_type_{{ $index }}">Chart Type <span class="text-danger">*</span></label>
-                                                    <select class="form-control" name="contents[chart_{{ $index }}][data][chart_type]" id="chart_type_{{ $index }}" required>
-                                                        <option value="">Select Chart Type</option>
-                                                        <option value="line" {{ json_decode($content->data)->chart_type === 'line' ? 'selected' : '' }}>Line Chart</option>
-                                                        <option value="bar" {{ json_decode($content->data)->chart_type === 'bar' ? 'selected' : '' }}>Bar Chart</option>
-                                                        <option value="column" {{ json_decode($content->data)->chart_type === 'column' ? 'selected' : '' }}>Column Chart</option>
-                                                        <option value="area" {{ json_decode($content->data)->chart_type === 'area' ? 'selected' : '' }}>Area Chart</option>
-                                                        <option value="pie" {{ json_decode($content->data)->chart_type === 'pie' ? 'selected' : '' }}>Pie Chart</option>
-                                                    </select>
-                                                </div>
                                                 <div class="table-responsive">
                                                     <table class="table table-bordered" id="chart_{{ $index }}">
                                                         <thead>
@@ -203,7 +192,7 @@
                                 </div>
 
                                 <div class="float-end">
-                                    <a href="{{ url('admin-panel/posts') }}" class="btn btn-primary button-last">Go Back</a>
+                                    <a href="{{ url('client-panel/posts') }}" class="btn btn-primary button-last">Go Back</a>
                                     <button type="submit" class="btn btn-success button-last">Update</button>
                                 </div>
                             </form>
@@ -264,17 +253,6 @@
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
                         <label>Graph Chart Input</label>
-                        <div class="mb-2">
-                            <label for="chart_type_${fieldId}">Chart Type <span class="text-danger">*</span></label>
-                            <select class="form-control" name="contents[${fieldId}][data][chart_type]" id="chart_type_${fieldId}" required>
-                                <option value="">Select Chart Type</option>
-                                <option value="line">Line Chart</option>
-                                <option value="bar">Bar Chart</option>
-                                <option value="column">Column Chart</option>
-                                <option value="area">Area Chart</option>
-                                <option value="pie">Pie Chart</option>
-                            </select>
-                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="${fieldId}">
                                 <thead>
@@ -454,7 +432,7 @@
                         processData: false,
                         contentType: false,
                         success: function(response) {
-                            window.location.href = "{{ url('admin-panel/posts') }}";
+                            window.location.href = "{{ url('client-panel/posts') }}";
                         },
                         error: function(xhr) {
                             errorList.empty();
@@ -478,4 +456,4 @@
             });
         </script>
     </x-slot>
-</x-app-layout>
+</x-client-layout>

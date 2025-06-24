@@ -1,5 +1,5 @@
-<x-app-layout>
-    <x-slot name="page_title">{{ $page_title ?? 'Post Edit |' }}</x-slot>
+<x-client-layout>
+    <x-slot name="page_title">{{ $page_title ?? 'Post Create |' }}</x-slot>
 
     <div class="container-fluid">
         <div class="row">
@@ -8,12 +8,12 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('admin-panel/dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('admin-panel/posts') }}">Posts</a></li>
-                            <li class="breadcrumb-item active">Edit</li>
+                            <li class="breadcrumb-item"><a href="{{ url('client-panel/dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('client-panel/posts') }}">Posts</a></li>
+                            <li class="breadcrumb-item active">Create</li>
                         </ol>
                     </div>
-                    <h4 class="page-title">Post Edit</h4>
+                    <h4 class="page-title">Post Create</h4>
                 </div>
             </div>
         </div>
@@ -56,6 +56,7 @@
                                         <p class="mb-0 font-14 mt-1 text-start">CKEditor</p>
                                     </button>
                                 </div>
+
                                 <div class="col-6 mb-2">
                                     <button type="button" class="btn m-0 p-0" id="form_field_graph_table_input">
                                         <div class="avatar-sm">
@@ -70,44 +71,43 @@
                         </div>
 
                         <div class="page-aside-right">
-                            <form action="{{ url('admin-panel/posts', $post->id) }}" method="POST" enctype="multipart/form-data" id="post_form">
+                            <form action="{{ url('client-panel/posts') }}" method="POST" enctype="multipart/form-data" id="post_form">
                                 @csrf
-                                @method('PUT')
 
                                 <div class="row g-2">
                                     <div class="mb-2 col-md-12">
                                         <label for="title">Title <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $post->title) }}" placeholder="" required>
+                                        <input type="text" class="form-control" id="title" name="title" value="{{ old('title', $post->title ?? '') }}" placeholder="" required>
                                     </div>
                                 </div>
 
                                 <div class="row g-2">
                                     <div class="mb-2 col-md-12">
                                         <label for="excerpt">Excerpt</label>
-                                        <textarea class="form-control" id="excerpt" name="excerpt" rows="2">{{ old('excerpt', $post->excerpt) }}</textarea>
+                                        <textarea class="form-control" id="excerpt" name="excerpt" rows="2">{{ old('excerpt', $post->excerpt ?? '') }}</textarea>
                                     </div>
                                 </div>
 
                                 <div class="row g-2">
                                     <div class="mb-2 col-md-12">
-                                        <label for="category_ids">Category <span class="text-danger">*</span></label>
-                                        <select class="select2 form-control select2-multiple" id="category_ids" name="category_ids[]" data-toggle="select2" multiple="multiple" required>
-                                            <option value="">Choose Category</option>
+                                        <label for="category_ids"> Category <span class="text-danger">*</span> </label>
+                                        <select class="select2 form-control select2-multiple" id="category_ids" name="category_ids[]" data-toggle="select2" multiple="multiple">
+                                            <option value=""> Choose Category </option>
                                             @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}" {{ in_array($category->id, (array) old('category_ids', $post->categories->pluck('id')->toArray())) ? 'selected' : '' }}>
-                                                    {{ $category->name ?? '' }}
+                                                <option value="{{ $category->id }}" {{ in_array($category->id, (old('category_ids', []) ? old('category_ids', []) : ($selected_category_ids ?? []))) ? 'selected' : '' }}>
+                                                    {{ $category->name ?? "" }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                </div>
+                                </div> 
 
                                 <div class="row g-2">
                                     <div class="mb-2 col-md-6">
                                         <label for="featured_image">Featured Image</label>
-                                        <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/png,image/gif,image/jpeg">
-                                        @if ($post->featured_image)
-                                            <img src="{{ url($post->featured_image) }}" alt="featured_image" class="mt-1 img-fluid img-thumbnail" width="200" />
+                                        <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/png, image/gif, image/jpeg">
+                                        @if ($post->featured_image ?? false)
+                                            <img src="{{ url('images/posts', $post->featured_image) }}" alt="featured_image" class="mt-1 img-fluid img-thumbnail" width="200" />
                                         @endif
                                     </div>
 
@@ -116,7 +116,7 @@
                                         <select id="input_status" name="input_status" class="form-select" required>
                                             <option value="">Choose Status</option>
                                             @foreach ($status as $stat)
-                                                <option value="{{ $stat }}" {{ old('input_status', $post->status) == $stat ? 'selected' : '' }}>
+                                                <option value="{{ $stat }}" {{ old('input_status', $post->status ?? '') == $stat ? 'selected' : '' }}>
                                                     {{ $stat }}
                                                 </option>
                                             @endforeach
@@ -125,86 +125,12 @@
                                 </div>
 
                                 <div class="row g-2" id="dynamic_fields">
-                                    @foreach ($post->contents as $index => $content)
-                                        @if ($content->content_type === 'text')
-                                            <div class="mb-3 col-md-12 dynamic-field" data-field-id="ckeditor_{{ $index }}">
-                                                <label for="ckeditor_{{ $index }}">CKEditor Content</label>
-                                                <textarea class="form-control" id="ckeditor_{{ $index }}" name="contents[ckeditor_{{ $index }}][data]" rows="5">{!! json_decode($content->data, true) !!}</textarea>
-                                                <input type="hidden" name="contents[ckeditor_{{ $index }}][content_type]" value="text">
-                                                <input type="hidden" name="contents[ckeditor_{{ $index }}][id]" value="{{ $content->id }}">
-                                                <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove</button>
-                                            </div>
-                                            <script>
-                                                document.addEventListener('DOMContentLoaded', function() {
-                                                    initializeCKEditor('ckeditor_{{ $index }}');
-                                                });
-                                            </script>
-                                        @elseif ($content->content_type === 'graph')
-                                            <div class="mb-3 col-md-12 dynamic-field" data-field-id="chart_{{ $index }}">
-                                                <label>Graph Chart Input</label>
-                                                <div class="mb-2">
-                                                    <label for="chart_type_{{ $index }}">Chart Type <span class="text-danger">*</span></label>
-                                                    <select class="form-control" name="contents[chart_{{ $index }}][data][chart_type]" id="chart_type_{{ $index }}" required>
-                                                        <option value="">Select Chart Type</option>
-                                                        <option value="line" {{ json_decode($content->data)->chart_type === 'line' ? 'selected' : '' }}>Line Chart</option>
-                                                        <option value="bar" {{ json_decode($content->data)->chart_type === 'bar' ? 'selected' : '' }}>Bar Chart</option>
-                                                        <option value="column" {{ json_decode($content->data)->chart_type === 'column' ? 'selected' : '' }}>Column Chart</option>
-                                                        <option value="area" {{ json_decode($content->data)->chart_type === 'area' ? 'selected' : '' }}>Area Chart</option>
-                                                        <option value="pie" {{ json_decode($content->data)->chart_type === 'pie' ? 'selected' : '' }}>Pie Chart</option>
-                                                    </select>
-                                                </div>
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered" id="chart_{{ $index }}">
-                                                        <thead>
-                                                            <tr id="header_chart_{{ $index }}">
-                                                                <th>Label</th>
-                                                                @foreach (json_decode($content->data)->series as $seriesIndex => $series)
-                                                                    <th>
-                                                                        <input type="text" class="form-control" name="contents[chart_{{ $index }}][data][series][{{ $seriesIndex }}][name]" value="{{ $series->name }}" placeholder="Series Name">
-                                                                        <select class="form-control mt-1" name="contents[chart_{{ $index }}][data][series][{{ $seriesIndex }}][color]">
-                                                                            <option value="">No Color</option>
-                                                                            <option value="red" {{ $series->color === 'red' ? 'selected' : '' }}>Red</option>
-                                                                            <option value="blue" {{ $series->color === 'blue' ? 'selected' : '' }}>Blue</option>
-                                                                            <option value="green" {{ $series->color === 'green' ? 'selected' : '' }}>Green</option>
-                                                                            <option value="orange" {{ $series->color === 'orange' ? 'selected' : '' }}>Orange</option>
-                                                                        </select>
-                                                                        <button type="button" class="btn btn-danger btn-sm mt-1 remove-series">Remove</button>
-                                                                    </th>
-                                                                @endforeach
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="body_chart_{{ $index }}">
-                                                            @foreach (json_decode($content->data)->labels as $labelIndex => $label)
-                                                                <tr>
-                                                                    <td><input type="text" class="form-control" name="contents[chart_{{ $index }}][data][labels][{{ $labelIndex }}]" value="{{ $label }}" placeholder="Label"></td>
-                                                                    @foreach (json_decode($content->data)->series as $seriesIndex => $series)
-                                                                        <td><input type="number" class="form-control" name="contents[chart_{{ $index }}][data][series][{{ $seriesIndex }}][values][{{ $labelIndex }}]" value="{{ $series->values[$labelIndex] }}" placeholder="Value"></td>
-                                                                    @endforeach
-                                                                    <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <button type="button" class="btn btn-primary btn-sm mt-2 add-row" data-table-id="chart_{{ $index }}">Add Row</button>
-                                                <button type="button" class="btn btn-primary btn-sm mt-2 add-series" data-table-id="chart_{{ $index }}">Add Series</button>
-                                                <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove Chart</button>
-                                                <input type="hidden" name="contents[chart_{{ $index }}][content_type]" value="graph">
-                                                <input type="hidden" name="contents[chart_{{ $index }}][id]" value="{{ $content->id }}">
-                                            </div>
-                                            <script>
-                                                document.addEventListener('DOMContentLoaded', function() {
-                                                    initializeChartControls('chart_{{ $index }}');
-                                                });
-                                            </script>
-                                        @endif
-                                    @endforeach
+                                    <!-- Dynamic CKEditor and Graph Table sections will be added here -->
                                 </div>
 
                                 <div class="float-end">
-                                    <a href="{{ url('admin-panel/posts') }}" class="btn btn-primary button-last">Go Back</a>
-                                    <button type="submit" class="btn btn-success button-last">Update</button>
+                                    <a href="{{ url('client-panel/posts') }}" class="btn btn-primary button-last">Go Back</a>
+                                    <button type="submit" class="btn btn-success button-last">Save</button>
                                 </div>
                             </form>
                         </div>
@@ -216,18 +142,9 @@
 
     <x-slot name="script">
         <script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script type="text/javascript">
-            // Initialize Select2
-            $(document).ready(function() {
-                $('#category_ids').select2({
-                    placeholder: "Choose Category",
-                    allowClear: true
-                });
-            });
-
             // Counter for unique field IDs
-            let fieldCounter = {{ $post->contents->count() }};
+            let fieldCounter = 0;
 
             // Initialize CKEditor on existing textareas
             function initializeCKEditor(textareaId) {
@@ -264,17 +181,6 @@
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
                         <label>Graph Chart Input</label>
-                        <div class="mb-2">
-                            <label for="chart_type_${fieldId}">Chart Type <span class="text-danger">*</span></label>
-                            <select class="form-control" name="contents[${fieldId}][data][chart_type]" id="chart_type_${fieldId}" required>
-                                <option value="">Select Chart Type</option>
-                                <option value="line">Line Chart</option>
-                                <option value="bar">Bar Chart</option>
-                                <option value="column">Column Chart</option>
-                                <option value="area">Area Chart</option>
-                                <option value="pie">Pie Chart</option>
-                            </select>
-                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="${fieldId}">
                                 <thead>
@@ -320,13 +226,19 @@
                 const headerRow = document.getElementById(`header_${tableId}`);
                 const tbody = document.getElementById(`body_${tableId}`);
 
-                // Add Series
                 document.querySelector(`[data-table-id="${tableId}"].add-series`).addEventListener('click', function () {
+                    // const seriesIndex = headerRow.querySelectorAll('th').length - 2;
+
+                    const headerRow = document.getElementById(`header_${tableId}`);
+                    const tbody = document.getElementById(`body_${tableId}`);
+
                     const seriesIndex = headerRow.querySelectorAll('th').length - 2;
+
                     if (seriesIndex >= 4) {
                         alert("You can only add up to 4 series.");
                         return;
                     }
+
                     const seriesHtml = `
                         <th>
                             <input type="text" class="form-control" name="contents[${tableId}][data][series][${seriesIndex}][name]" value="Series ${seriesIndex + 1}" placeholder="Series Name">
@@ -353,7 +265,7 @@
 
                 // Add Row
                 document.querySelector(`[data-table-id="${tableId}"].add-row`).addEventListener('click', function () {
-                    const seriesCount = headerRow.querySelectorAll('th').length - 2;
+                    const seriesCount = headerRow.querySelectorAll('th').length - 2; // Exclude Label and Actions columns
                     const rowIndex = tbody.querySelectorAll('tr').length;
                     let rowHtml = `
                         <tr>
@@ -400,75 +312,46 @@
                 document.getElementById(`body_${tableId}`).querySelectorAll('.remove-row').forEach(button => {
                     button.addEventListener('click', function () {
                         button.closest('tr').remove();
-                        reindexChartInputs(tableId);
                     });
                 });
             }
 
-            // Reindex chart inputs to ensure sequential indices
-            function reindexChartInputs(tableId) {
-                const tbody = document.getElementById(`body_${tableId}`);
-                const headerRow = document.getElementById(`header_${tableId}`);
-                const rows = tbody.querySelectorAll('tr');
-                const seriesCount = headerRow.querySelectorAll('th').length - 2;
-
-                // Reindex labels
-                rows.forEach((row, rowIndex) => {
-                    const labelInput = row.querySelector(`input[name^="contents[${tableId}][data][labels]"]`);
-                    labelInput.name = `contents[${tableId}][data][labels][${rowIndex}]`;
-
-                    // Reindex series values
-                    for (let i = 0; i < seriesCount; i++) {
-                        const valueInput = row.querySelector(`input[name^="contents[${tableId}][data][series][${i}][values]"]`);
-                        if (valueInput) {
-                            valueInput.name = `contents[${tableId}][data][series][${i}][values][${rowIndex}]`;
-                        }
-                    }
-                });
-            }
-
-            // AJAX form submission
             $(document).ready(function() {
                 $("#post_form").on("submit", function(e) {
                     e.preventDefault();
 
-                    // Update CKEditor instances
                     for (var instance in CKEDITOR.instances) {
                         CKEDITOR.instances[instance].updateElement();
                     }
-
-                    // Reindex all chart inputs
-                    document.querySelectorAll('.dynamic-field[id^="chart_"]').forEach(field => {
-                        const tableId = field.getAttribute('id');
-                        reindexChartInputs(tableId);
-                    });
-
+    
                     let formData = new FormData(this);
                     let errorContainer = $("#form-errors");
                     let errorList = $("#error-list");
 
                     $.ajax({
                         url: $(this).attr('action'),
-                        method: 'POST', // Laravel handles PUT via _method
+                        method: 'POST',
                         data: formData,
                         processData: false,
                         contentType: false,
                         success: function(response) {
-                            window.location.href = "{{ url('admin-panel/posts') }}";
+                            window.location.href = "{{ url('client-panel/posts') }}";
                         },
                         error: function(xhr) {
                             errorList.empty();
                             errorContainer.addClass('d-none');
-
+    
                             if (xhr.responseJSON && xhr.responseJSON.errors) {
                                 errorContainer.removeClass('d-none');
                                 $.each(xhr.responseJSON.errors, function(key, value) {
                                     errorList.append('<li>' + value + '</li>');
                                 });
-                            } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                            }
+                            else if (xhr.responseJSON && xhr.responseJSON.error) {
                                 errorContainer.removeClass('d-none');
                                 errorList.append('<li>' + xhr.responseJSON.error + '</li>');
-                            } else {
+                            } 
+                            else {
                                 errorContainer.removeClass('d-none');
                                 errorList.append('<li>An unexpected error occurred. Please try again.</li>');
                             }
@@ -478,4 +361,4 @@
             });
         </script>
     </x-slot>
-</x-app-layout>
+</x-client-layout>

@@ -58,11 +58,17 @@
                                     </div>
                                 </div>
 
-                                <a href="#log" data-bs-toggle="modal" class="tf-cur-item link">
-                                    <i class="icon-user-3"></i>
-                                    <span class="body-small">My account:</span>
-                                    <i class="icon-arrow-down"></i>
-                                </a>
+                                @if (Auth::guard('client')->check())
+                                    <a href="{{ url('client-panel/dashboard') }}" class="tf-cur-item link">
+                                        <i class="icon-user-3"></i>
+                                        <span class="body-small">My Dashboard</span>
+                                    </a>
+                                @else
+                                    <a href="{{ url('client-panel/login') }}" class="tf-cur-item link">
+                                        <i class="icon-user-3"></i>
+                                        <span class="body-small">Login & Registration</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -440,103 +446,6 @@
                                 <option>বাংলা</option>
                             </select>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal modalCentered fade modal-log" id="log">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <span class="icon icon-close btn-hide-popup" data-bs-dismiss="modal"></span>
-
-                    <div class="modal-log-wrap list-file-delete">
-                        <h5 class="title fw-semibold">Log In</h5>
-
-                        <form action="#" class="form-log">
-                            <div class="form-content">
-                                <fieldset>
-                                    <label class="fw-semibold body-md-2">Email *</label>
-                                    <input type="text" placeholder="Enter your email address">
-                                </fieldset>
-
-                                <fieldset>
-                                    <label class="fw-semibold body-md-2">Password *</label>
-                                    <input type="password" placeholder="Enter your password">
-                                </fieldset>
-
-                                <a href="#" class="link text-end body-text-3">Forgot password ?</a>
-                            </div>
-
-                            <button type="submit" class="tf-btn w-100 text-white">Login</button>
-
-                            <p class="body-text-3 text-center">
-                                Don't you have an account?
-                                <a href="#register" data-bs-toggle="modal" class="text-primary">
-                                    Register
-                                </a>
-                            </p>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal modalCentered fade modal-log" id="register">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <span class="icon icon-close btn-hide-popup" data-bs-dismiss="modal"></span>
-
-                    <div class="modal-log-wrap list-file-delete">
-                        <h5 class="title fw-semibold">Sign Up</h5>
-
-                        <form action="#" class="form-log">
-                            <div class="form-content">
-                                <fieldset>
-                                    <label class="fw-semibold body-md-2">Phone Email *</label>
-                                    <input type="text" placeholder="Enter your email address">
-                                </fieldset>
-                            </div>
-
-                            <button type="button" class="tf-btn w-100 text-white" id="registration_email_submit_button">Submit</button>
-
-                            <p class="body-text-3 text-center">
-                                Already have an account?
-                                <a href="#log" data-bs-toggle="modal" class="text-primary">
-                                    Sign in
-                                </a>
-                            </p>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal modalCentered fade modal-log" id="otp_verification">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <span class="icon icon-close btn-hide-popup" data-bs-dismiss="modal"></span>
-
-                    <div class="modal-log-wrap list-file-delete">
-                        <h5 class="title fw-semibold">OTP Verification</h5>
-
-                        <form action="#" class="form-log">
-                            <div class="form-content">
-                                <fieldset>
-                                    <label class="fw-semibold body-md-2">OTP *</label>
-                                    <input type="text" placeholder="Enter OTP">
-                                </fieldset>
-                            </div>
-
-                            <button type="submit" class="tf-btn w-100 text-white">Next</button>
-
-                            <p class="body-text-3 text-center">
-                                Already have an account?
-                                <a href="#log" data-bs-toggle="modal" class="text-primary">
-                                    Sign in
-                                </a>
-                            </p>
-                        </form>
                     </div>
                 </div>
             </div>

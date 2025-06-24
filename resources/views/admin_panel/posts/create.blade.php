@@ -90,7 +90,7 @@
 
                                 <div class="row g-2">
                                     <div class="mb-2 col-md-12">
-                                        <label for="category_ids"> Sub Category <span class="text-danger">*</span> </label>
+                                        <label for="category_ids"> Category <span class="text-danger">*</span> </label>
                                         <select class="select2 form-control select2-multiple" id="category_ids" name="category_ids[]" data-toggle="select2" multiple="multiple">
                                             <option value=""> Choose Category </option>
                                             @foreach ($categories as $category)
@@ -181,6 +181,17 @@
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
                         <label>Graph Chart Input</label>
+                        <div class="mb-2">
+                            <label for="chart_type_${fieldId}">Chart Type <span class="text-danger">*</span></label>
+                            <select class="form-control" name="contents[${fieldId}][data][chart_type]" id="chart_type_${fieldId}" required>
+                                <option value="">Select Chart Type</option>
+                                <option value="line">Line Chart</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="column">Column Chart</option>
+                                <option value="area">Area Chart</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="${fieldId}">
                                 <thead>
@@ -227,11 +238,6 @@
                 const tbody = document.getElementById(`body_${tableId}`);
 
                 document.querySelector(`[data-table-id="${tableId}"].add-series`).addEventListener('click', function () {
-                    // const seriesIndex = headerRow.querySelectorAll('th').length - 2;
-
-                    const headerRow = document.getElementById(`header_${tableId}`);
-                    const tbody = document.getElementById(`body_${tableId}`);
-
                     const seriesIndex = headerRow.querySelectorAll('th').length - 2;
 
                     if (seriesIndex >= 4) {

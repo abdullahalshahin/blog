@@ -1,8 +1,9 @@
 <x-app-layout>
-    <x-slot name="page_title">{{ $page_title ?? 'Posts |' }}</x-slot>
+    <x-slot name="page_title">{{ $page_title ?? 'Clients |' }}</x-slot>
 
     <x-slot name="style">
         <link href="{{ asset('hyper/css/vendor/dataTables.bootstrap5.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('hyper/css/vendor/responsive.bootstrap5.css') }}" rel="stylesheet" type="text/css" />
     </x-slot>
 
     <div class="container-fluid">
@@ -13,11 +14,11 @@
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a></li>
                             <li class="breadcrumb-item"><a href="{{ url('admin-panel/dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Posts</li>
+                            <li class="breadcrumb-item active">Clients</li>
                         </ol>
                     </div>
                     
-                    <h4 class="page-title">Post List</h4>
+                    <h4 class="page-title">Client List</h4>
                 </div>
             </div>
         </div>
@@ -34,7 +35,7 @@
                     <div class="card-body">
                         <div class="row mb-2">
                             <div class="col-sm-4">
-                                <a href="{{ url('admin-panel/posts/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Post</a>
+                                <a href="{{ url('admin-panel/clients/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Client</a>
                             </div>
                         </div>
 
@@ -43,39 +44,45 @@
                                 <thead>
                                     <tr>
                                         <th>SL</th>
-                                        <th>Author</th>
-                                        <th>Title</th>
-                                        <th>Excerpt</th>
+                                        <th>Client</th>
+                                        <th>Gender</th>
+                                        <th>Email</th>
                                         <th>Status</th>
-                                        <th>Published Time</th>
                                         <th style="width: 75px;">Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($posts as $key => $post)
+                                    @foreach ($clients as $key => $client)
                                         <tr>
                                             <td>{{ ++$key }}</td>
-                                            <td> {{ class_basename($post->author_type) }}: {{ $post->author->name ?? "" }} </td>
-                                            <td><span style="display: block; width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ $post->title ?? "" }}</span></td>
-                                            <td><span style="display: block; width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ $post->excerpt ?? "" }}</span></td>
+                                            <td class="table-user">
+                                                @if ($client->profile_image)
+                                                    <img src="{{ url('images/clients', $client->profile_image) }}" alt="table-user" class="me-2 rounded-circle">
+                                                @else
+                                                    <img src="{{ asset('hyper/images/avator.png') }}" alt="table-user" class="me-2 rounded-circle">
+                                                @endif
+
+                                                <a href="{{ url('admin-panel/clients/'. $client->id . '') }}" class="text-body fw-semibold"> {{ $client->name ?? "" }} </a>
+                                            </td>
+                                            <td> {{ $client->gender ?? "" }} </td>
+                                            <td> {{ $client->email ?? "" }} </td>
                                             <td>
-                                                @if ($post->status == "Published")
-                                                    <span class="badge badge-success-lighten"> Published </span>
-                                                @elseif ($post->status == "Draft")
-                                                    <span class="badge badge-warning-lighten"> Draft </span>
-                                                @elseif ($post->status == "Archived")
-                                                    <span class="badge badge-danger-lighten"> Archived </span>
+                                                @if ($client->status == "Active")
+                                                    <span class="badge badge-success-lighten"> Active </span>
+                                                @elseif ($client->status == "Pending")
+                                                    <span class="badge badge-warning-lighten"> Pending </span>
+                                                @elseif ($client->status == "Suspended")
+                                                    <span class="badge badge-danger-lighten"> Suspended </span>
                                                 @endif
                                             </td>
-                                            <td>{{ $post->published_at ? \Carbon\Carbon::parse($post->published_at)->format('d-M-Y g:i:s A') : 'N/A' }}</td>
                                             <td>
-                                                <form action="{{ url('admin-panel/posts', $post->id) }}" method="POST">
+                                                <form action="{{ url('admin-panel/clients', $client->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
 
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '') }}" target="_blank" rel="noopener noreferrer" class="action-icon"> <i class="mdi mdi-eye"></i></a>
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
+                                                    <a href="{{ url('admin-panel/clients/'. $client->id . '') }}" class="action-icon"> <i class="mdi mdi-eye"></i></a>
+                                                    <a href="{{ url('admin-panel/clients/'. $client->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
                                                     
                                                     <input name="_method" type="hidden" value="DELETE">
                                                     <button type="submit" class="btn action-icon show_confirm" data-toggle="tooltip" title='Delete'><i class="mdi mdi-delete"></i></button>
@@ -95,6 +102,8 @@
     <x-slot name="script">
         <script src="{{ asset('hyper/js/vendor/jquery.dataTables.min.js') }}"></script>
         <script src="{{ asset('hyper/js/vendor/dataTables.bootstrap5.js') }}"></script>
+        <script src="{{ asset('hyper/js/vendor/dataTables.responsive.min.js') }}"></script>
+        <script src="{{ asset('hyper/js/vendor/responsive.bootstrap5.min.js') }}"></script>
 
         <script src="{{ asset('hyper/js/pages/demo.datatable-init.js') }}"></script>
         <script src="{{ asset('hyper/js/sweetalert2@11') }}"></script>

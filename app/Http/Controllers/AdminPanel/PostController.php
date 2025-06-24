@@ -135,7 +135,11 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Post $post) {
-        //
+        $categories = Category::query()
+            ->orderBy('name', "asc")
+            ->get();
+
+        return view('post_details', compact('post','categories'));
     }
 
     /**

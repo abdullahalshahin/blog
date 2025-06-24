@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PublicPageController extends Controller
 {
@@ -31,6 +34,37 @@ class PublicPageController extends Controller
             ->get();
 
         return view('post_details', compact('post','categories'));
+    }
+
+    public function comment(Request $request, Post $post) {
+        $validated_data = $request->validate([
+            'comment' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            Comment::create([
+                'commenter_type' => 'App\Models\Client',
+                'commenter_id' => Auth::guard('client')->user()->id,
+                'post_id' => $post->id,
+                'content' => $validated_data['comment'],
+                'status' => "Approved"
+            ]);
+
+            DB::commit();
+
+            return response()->json(['success' => 'Comment created successfully.']);
+        }
+        catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json(['error' => 'An error occurred while creating the post: ' . $e->getMessage()], 422);
+        }
+    }
+
+    public function comment_reply() {
+        //
     }
 
     public function about_us() {

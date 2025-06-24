@@ -31,7 +31,11 @@ Route::middleware('auth')->group(function() {
         Route::get('/dashboard', [AdminPanel\DashboardController::class, 'index']);
 
         Route::resource('categories', AdminPanel\CategoryController::class);
+        Route::resource('clients', AdminPanel\ClientController::class);
         Route::resource('posts', AdminPanel\PostController::class);
+        Route::resource('users', AdminPanel\UserController::class);
+
+        Route::post('/comment-reply/{post}', [PublicPageController::class, 'comment_reply']);
 
         Route::get('/my-account', [AdminPanel\MyAccountController::class, 'my_account']);
         Route::get('/my-account-edit', [AdminPanel\MyAccountController::class, 'my_account_edit']);
@@ -41,19 +45,25 @@ Route::middleware('auth')->group(function() {
 });
 
 // ----------------------- CLIENT panel route section ----------------------- //
-// Route::prefix('client-panel')->group(function() {
-//     Route::get('/login', [Auth\ClientAuthenticationController::class, 'login']);
-//     Route::post('/login', [Auth\ClientAuthenticationController::class, 'login_store']);
-//     Route::get('/registration', [Auth\ClientAuthenticationController::class, 'registration']);
-//     Route::post('/registration', [Auth\ClientAuthenticationController::class, 'registration_store']);
+Route::prefix('client-panel')->group(function() {
+    Route::get('/login', [Auth\ClientAuthenticationController::class, 'login']);
+    Route::post('/login', [Auth\ClientAuthenticationController::class, 'login_store']);
+    Route::get('/registration', [Auth\ClientAuthenticationController::class, 'registration']);
+    Route::post('/registration', [Auth\ClientAuthenticationController::class, 'registration_store']);
 
-//     Route::middleware('auth:client')->group(function() {
-//         Route::get('/dashboard', [ClientPanel\DashboardController::class, 'index']);
+    Route::middleware('auth:client')->group(function() {
+        Route::get('/dashboard', [ClientPanel\DashboardController::class, 'index']);
 
-//         Route::get('/my-account', [ClientPanel\MyAccountController::class, 'my_account']);
-//         Route::get('/my-account-edit', [ClientPanel\MyAccountController::class, 'my_account_edit']);
-//         Route::put('/my-account-update', [ClientPanel\MyAccountController::class, 'my_account_update']);
-//     });
-// });
+        Route::resource('posts', ClientPanel\PostController::class);
+        
+        Route::post('/comment/{post}', [PublicPageController::class, 'comment']);
+
+        Route::get('/my-account', [ClientPanel\MyAccountController::class, 'my_account']);
+        Route::get('/my-account-edit', [ClientPanel\MyAccountController::class, 'my_account_edit']);
+        Route::put('/my-account-update', [ClientPanel\MyAccountController::class, 'my_account_update']);
+        Route::get('/change-theme-color', [ClientPanel\MyAccountController::class, 'change_theme_color']);
+        Route::post('/logout', [Auth\ClientAuthenticationController::class, 'log_out']);
+    });
+});
 
 require __DIR__.'/auth.php';

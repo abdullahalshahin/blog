@@ -90,13 +90,6 @@
                         </li>
 
                         <li class="side-nav-title side-nav-item mt-1"> System Settings </li>
-                        
-                        <li class="side-nav-item">
-                            <a href="{{ url('admin-panel/roles') }}" class="side-nav-link">
-                                <i class="uil-file-lock-alt"></i>
-                                <span> Role & Permissions </span>
-                            </a>
-                        </li>
 
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#Settings" aria-expanded="false" aria-controls="Settings" class="side-nav-link">
@@ -123,7 +116,7 @@
                         </li>
 
                         <li class="side-nav-item">
-                            <a href="{{ url('seller-panel/my-account') }}" class="side-nav-link">
+                            <a href="{{ url('admin-panel/my-account') }}" class="side-nav-link">
                                 <i class="uil-user-square"></i>
                                 <span> My Account </span>
                             </a>

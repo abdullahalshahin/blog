@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-client-layout>
     <x-slot name="page_title">{{ $page_title ?? 'Posts |' }}</x-slot>
 
     <x-slot name="style">
@@ -12,7 +12,7 @@
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a></li>
-                            <li class="breadcrumb-item"><a href="{{ url('admin-panel/dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url('client-panel/dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item active">Posts</li>
                         </ol>
                     </div>
@@ -34,7 +34,7 @@
                     <div class="card-body">
                         <div class="row mb-2">
                             <div class="col-sm-4">
-                                <a href="{{ url('admin-panel/posts/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Post</a>
+                                <a href="{{ url('client-panel/posts/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Post</a>
                             </div>
                         </div>
 
@@ -70,12 +70,12 @@
                                             </td>
                                             <td>{{ $post->published_at ? \Carbon\Carbon::parse($post->published_at)->format('d-M-Y g:i:s A') : 'N/A' }}</td>
                                             <td>
-                                                <form action="{{ url('admin-panel/posts', $post->id) }}" method="POST">
+                                                <form action="{{ url('client-panel/posts', $post->id) }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
 
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '') }}" target="_blank" rel="noopener noreferrer" class="action-icon"> <i class="mdi mdi-eye"></i></a>
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
+                                                    <a href="{{ url('client-panel/posts/'. $post->id . '') }}" target="_blank" rel="noopener noreferrer" class="action-icon"> <i class="mdi mdi-eye"></i></a>
+                                                    <a href="{{ url('client-panel/posts/'. $post->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
                                                     
                                                     <input name="_method" type="hidden" value="DELETE">
                                                     <button type="submit" class="btn action-icon show_confirm" data-toggle="tooltip" title='Delete'><i class="mdi mdi-delete"></i></button>
@@ -129,4 +129,4 @@
             });
         </script>
     </x-slot>
-</x-app-layout>
+</x-client-layout>

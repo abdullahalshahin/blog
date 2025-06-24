@@ -1,8 +1,9 @@
 <x-app-layout>
-    <x-slot name="page_title">{{ $page_title ?? 'Posts |' }}</x-slot>
+    <x-slot name="page_title">{{ $page_title ?? 'Users |' }}</x-slot>
 
     <x-slot name="style">
         <link href="{{ asset('hyper/css/vendor/dataTables.bootstrap5.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('hyper/css/vendor/responsive.bootstrap5.css') }}" rel="stylesheet" type="text/css" />
     </x-slot>
 
     <div class="container-fluid">
@@ -13,11 +14,11 @@
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a></li>
                             <li class="breadcrumb-item"><a href="{{ url('admin-panel/dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Posts</li>
+                            <li class="breadcrumb-item active">Users</li>
                         </ol>
                     </div>
                     
-                    <h4 class="page-title">Post List</h4>
+                    <h4 class="page-title">User List</h4>
                 </div>
             </div>
         </div>
@@ -34,7 +35,7 @@
                     <div class="card-body">
                         <div class="row mb-2">
                             <div class="col-sm-4">
-                                <a href="{{ url('admin-panel/posts/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Post</a>
+                                <a href="{{ url('admin-panel/users/create') }}" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add User</a>
                             </div>
                         </div>
 
@@ -43,40 +44,50 @@
                                 <thead>
                                     <tr>
                                         <th>SL</th>
-                                        <th>Author</th>
-                                        <th>Title</th>
-                                        <th>Excerpt</th>
+                                        <th>User</th>
+                                        <th>Mobile Number</th>
+                                        <th>Email</th>
                                         <th>Status</th>
-                                        <th>Published Time</th>
                                         <th style="width: 75px;">Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    @foreach ($posts as $key => $post)
+                                    @foreach ($users as $key => $user)
                                         <tr>
-                                            <td>{{ ++$key }}</td>
-                                            <td> {{ class_basename($post->author_type) }}: {{ $post->author->name ?? "" }} </td>
-                                            <td><span style="display: block; width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ $post->title ?? "" }}</span></td>
-                                            <td><span style="display: block; width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">{{ $post->excerpt ?? "" }}</span></td>
+                                            <td> {{ ++$key }} </td>
+                                            
+                                            <td class="table-user">
+                                                @if ($user->profile_image)
+                                                    <img src="{{ url('images/users', $user->profile_image) }}" alt="profile_image" class="me-2 rounded-circle" />
+                                                @else
+                                                    <img src="{{ asset('hyper/images/avator.png') }}" alt="profile_image" class="me-2 rounded-circle" />
+                                                @endif
+
+                                                <a href="{{ url('admin-panel/users', $user->id) }}" class="text-body fw-semibold"> {{ $user->name ?? "" }} </a>
+                                            </td>
+
+                                            <td> {{ $user->mobile_number ?? "" }} </td>
+
+                                            <td> {{ $user->email ?? "" }} </td>
+
                                             <td>
-                                                @if ($post->status == "Published")
-                                                    <span class="badge badge-success-lighten"> Published </span>
-                                                @elseif ($post->status == "Draft")
-                                                    <span class="badge badge-warning-lighten"> Draft </span>
-                                                @elseif ($post->status == "Archived")
-                                                    <span class="badge badge-danger-lighten"> Archived </span>
+                                                @if ($user->status == "Active")
+                                                    <span class="badge badge-success-lighten"> Active </span>
+                                                @elseif ($user->status == "Inactive")
+                                                    <span class="badge badge-warning-lighten"> Inactive </span>
+                                                @elseif ($user->status == "Blocked")
+                                                    <span class="badge badge-danger-lighten"> Blocked </span>
                                                 @endif
                                             </td>
-                                            <td>{{ $post->published_at ? \Carbon\Carbon::parse($post->published_at)->format('d-M-Y g:i:s A') : 'N/A' }}</td>
+
                                             <td>
-                                                <form action="{{ url('admin-panel/posts', $post->id) }}" method="POST">
+                                                <form action="{{ url('admin-panel/users/'. $user->id .'/delete') }}" method="POST">
                                                     @csrf
                                                     @method('DELETE')
 
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '') }}" target="_blank" rel="noopener noreferrer" class="action-icon"> <i class="mdi mdi-eye"></i></a>
-                                                    <a href="{{ url('admin-panel/posts/'. $post->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
-                                                    
+                                                    <a href="{{ url('admin-panel/users/'. $user->id . '') }}" class="action-icon"> <i class="mdi mdi-eye"></i></a>
+                                                    <a href="{{ url('admin-panel/users/'. $user->id . '/edit') }}" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
                                                     <input name="_method" type="hidden" value="DELETE">
                                                     <button type="submit" class="btn action-icon show_confirm" data-toggle="tooltip" title='Delete'><i class="mdi mdi-delete"></i></button>
                                                 </form>
@@ -95,6 +106,8 @@
     <x-slot name="script">
         <script src="{{ asset('hyper/js/vendor/jquery.dataTables.min.js') }}"></script>
         <script src="{{ asset('hyper/js/vendor/dataTables.bootstrap5.js') }}"></script>
+        <script src="{{ asset('hyper/js/vendor/dataTables.responsive.min.js') }}"></script>
+        <script src="{{ asset('hyper/js/vendor/responsive.bootstrap5.min.js') }}"></script>
 
         <script src="{{ asset('hyper/js/pages/demo.datatable-init.js') }}"></script>
         <script src="{{ asset('hyper/js/sweetalert2@11') }}"></script>
