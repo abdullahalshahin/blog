@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PostContent extends Model {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $guarded = [];
 }

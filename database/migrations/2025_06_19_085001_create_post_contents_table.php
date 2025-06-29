@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('post_id')->index();
             $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->string('title')->nullable();
             $table->string('content_type'); //text, grap
             $table->json('data')->nullable();
             $table->timestamps();

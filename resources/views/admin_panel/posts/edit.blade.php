@@ -128,7 +128,9 @@
                                     @foreach ($post->contents as $index => $content)
                                         @if ($content->content_type === 'text')
                                             <div class="mb-3 col-md-12 dynamic-field" data-field-id="ckeditor_{{ $index }}">
-                                                <label for="ckeditor_{{ $index }}">CKEditor Content</label>
+                                                <label for="ckeditor_{{ $index }}">CKEditor Title</label>
+                                                <input type="text" class="form-control mb-1" name="contents[ckeditor_{{ $index }}][title]" value="{{ $content->title ?? "" }}" placeholder="Section Title">
+
                                                 <textarea class="form-control" id="ckeditor_{{ $index }}" name="contents[ckeditor_{{ $index }}][data]" rows="5">{!! json_decode($content->data, true) !!}</textarea>
                                                 <input type="hidden" name="contents[ckeditor_{{ $index }}][content_type]" value="text">
                                                 <input type="hidden" name="contents[ckeditor_{{ $index }}][id]" value="{{ $content->id }}">
@@ -141,13 +143,17 @@
                                             </script>
                                         @elseif ($content->content_type === 'graph')
                                             <div class="mb-3 col-md-12 dynamic-field" data-field-id="chart_{{ $index }}">
-                                                <label>Graph Chart Input</label>
+                                                <label>Graph Chart Title</label>
+
+                                                <input type="text" class="form-control mb-1" name="contents[chart_{{ $index }}][title]" value="{{ $content->title ?? "" }}" placeholder="Section Title">
+                                                
                                                 <div class="mb-2">
                                                     <label for="chart_type_{{ $index }}">Chart Type <span class="text-danger">*</span></label>
                                                     <select class="form-control" name="contents[chart_{{ $index }}][data][chart_type]" id="chart_type_{{ $index }}" required>
                                                         <option value="">Select Chart Type</option>
                                                         <option value="line" {{ json_decode($content->data)->chart_type === 'line' ? 'selected' : '' }}>Line Chart</option>
-                                                        <option value="bar" {{ json_decode($content->data)->chart_type === 'bar' ? 'selected' : '' }}>Bar Chart</option>
+                                                        <option value="bar" {{ json_decode($content->data)->chart_type === 'bar' ? 'selected' : '' }}>Single Bar Chart</option>
+                                                        <option value="bar_distributed" {{ json_decode($content->data)->chart_type === 'bar_distributed' ? 'selected' : '' }}>Distributed Bar Chart</option>
                                                         <option value="column" {{ json_decode($content->data)->chart_type === 'column' ? 'selected' : '' }}>Column Chart</option>
                                                         <option value="area" {{ json_decode($content->data)->chart_type === 'area' ? 'selected' : '' }}>Area Chart</option>
                                                         <option value="pie" {{ json_decode($content->data)->chart_type === 'pie' ? 'selected' : '' }}>Pie Chart</option>
@@ -244,7 +250,8 @@
                 const fieldId = `ckeditor_${fieldCounter++}`;
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
-                        <label for="${fieldId}">CKEditor Content</label>
+                        <label for="${fieldId}">CKEditor Title</label>
+                        <input type="text" class="form-control mb-1" name="contents[${fieldId}][title]" value="" placeholder="Section Title">
                         <textarea class="form-control" id="${fieldId}" name="contents[${fieldId}][data]" rows="5"></textarea>
                         <input type="hidden" name="contents[${fieldId}][content_type]" value="text">
                         <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove</button>
@@ -263,13 +270,17 @@
                 const fieldId = `chart_${fieldCounter++}`;
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
-                        <label>Graph Chart Input</label>
+                        <label>Graph Chart Title</label>
+
+                        <input type="text" class="form-control mb-1" name="contents[${fieldId}][title]" value="" placeholder="Section Title">
+                        
                         <div class="mb-2">
                             <label for="chart_type_${fieldId}">Chart Type <span class="text-danger">*</span></label>
                             <select class="form-control" name="contents[${fieldId}][data][chart_type]" id="chart_type_${fieldId}" required>
                                 <option value="">Select Chart Type</option>
                                 <option value="line">Line Chart</option>
-                                <option value="bar">Bar Chart</option>
+                                <option value="bar">Single Bar Chart</option>
+                                <option value="bar_distributed">Distributed Bar Chart</option>
                                 <option value="column">Column Chart</option>
                                 <option value="area">Area Chart</option>
                                 <option value="pie">Pie Chart</option>
@@ -323,10 +334,12 @@
                 // Add Series
                 document.querySelector(`[data-table-id="${tableId}"].add-series`).addEventListener('click', function () {
                     const seriesIndex = headerRow.querySelectorAll('th').length - 2;
+                    
                     if (seriesIndex >= 4) {
                         alert("You can only add up to 4 series.");
                         return;
                     }
+
                     const seriesHtml = `
                         <th>
                             <input type="text" class="form-control" name="contents[${tableId}][data][series][${seriesIndex}][name]" value="Series ${seriesIndex + 1}" placeholder="Series Name">
@@ -339,6 +352,7 @@
                             </select>
                             <button type="button" class="btn btn-danger btn-sm mt-1 remove-series">Remove</button>
                         </th>`;
+                        
                     headerRow.insertBefore(document.createElement('th'), headerRow.lastElementChild).outerHTML = seriesHtml;
 
                     // Add value input to each row

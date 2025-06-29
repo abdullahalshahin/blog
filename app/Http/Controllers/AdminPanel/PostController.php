@@ -64,12 +64,13 @@ class PostController extends Controller
             'category_ids.*' => ['exists:categories,id'],
             'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
             'input_status' => ['required', 'in:' . implode(',', Post::$status)],
+            'contents.*.title' => ['nullable', 'string', 'max:255'],
             'contents.*.content_type' => ['required', 'in:text,graph'],
             'contents.*.data' => ['required'],
             'contents.*.data.labels.*' => ['required_if:contents.*.content_type,graph', 'string'],
             'contents.*.data.series.*.name' => ['required_if:contents.*.content_type,graph', 'string'],
             'contents.*.data.series.*.color' => ['nullable', 'in:red,blue,green,orange'],
-            'contents.*.data.series.*.values.*' => ['required_if:contents.*.content_type,graph', 'numeric'],
+            'contents.*.data.series.*.values.*' => ['nullable', 'numeric'],
         ]);
 
         DB::beginTransaction();
@@ -108,6 +109,7 @@ class PostController extends Controller
             foreach ($validated_data['contents'] as $content) {
                 PostContent::create([
                     'post_id' => $post->id,
+                    'title' => $content['title'],
                     'content_type' => $content['content_type'],
                     'data' => json_encode($content['data']),
                 ]);
@@ -171,13 +173,14 @@ class PostController extends Controller
             'category_ids.*' => ['exists:categories,id'],
             'featured_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:10240'],
             'input_status' => ['required', 'in:' . implode(',', Post::$status)],
+            'contents.*.title' => ['nullable', 'string', 'max:255'],
             'contents.*.content_type' => ['required', 'in:text,graph'],
             'contents.*.data' => ['required'],
             'contents.*.id' => ['sometimes', 'exists:post_contents,id'],
             'contents.*.data.labels.*' => ['required_if:contents.*.content_type,graph', 'string'],
             'contents.*.data.series.*.name' => ['required_if:contents.*.content_type,graph', 'string'],
             'contents.*.data.series.*.color' => ['nullable', 'in:red,blue,green,orange'],
-            'contents.*.data.series.*.values.*' => ['required_if:contents.*.content_type,graph', 'numeric'],
+            'contents.*.data.series.*.values.*' => ['nullable', 'numeric'],
         ]);
 
         DB::beginTransaction();
@@ -230,12 +233,14 @@ class PostController extends Controller
 
                 if (isset($content['id'])) {
                     $post->contents()->where('id', $content['id'])->update([
+                        'title' => $content['title'],
                         'content_type' => $content['content_type'],
                         'data' => $data,
                     ]);
                 }
                 else {
                     $post->contents()->create([
+                        'title' => $content['title'],
                         'content_type' => $content['content_type'],
                         'data' => $data,
                     ]);
@@ -264,6 +269,23 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(Post $post) {
-        //
+        DB::beginTransaction();
+
+        try {
+            $post->contents()->delete();
+
+            $post->delete();
+
+            DB::commit();
+
+            return redirect()->to('admin-panel/posts')
+                ->with('success', 'Deleted Successfully.');
+        } 
+        catch (\Exception $e) {
+            DB::rollback();
+
+            return back()
+                ->with('error', 'An error occurred while deleting the record. ' . $e->getMessage());
+        }
     }
 }

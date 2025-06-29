@@ -159,14 +159,18 @@
             // Add CKEditor section
             document.getElementById('form_field_ckeditor_input').addEventListener('click', function () {
                 const fieldId = `ckeditor_${fieldCounter++}`;
+
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
-                        <label for="${fieldId}">CKEditor Content</label>
+                        <label for="${fieldId}">CKEditor Title</label>
+                        <input type="text" class="form-control mb-1" name="contents[${fieldId}][title]" value="" placeholder="Section Title">
                         <textarea class="form-control" id="${fieldId}" name="contents[${fieldId}][data]" rows="5"></textarea>
                         <input type="hidden" name="contents[${fieldId}][content_type]" value="text">
                         <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove</button>
                     </div>`;
+
                 document.getElementById('dynamic_fields').insertAdjacentHTML('beforeend', html);
+
                 initializeCKEditor(fieldId);
 
                 // Add remove functionality
@@ -180,18 +184,22 @@
                 const fieldId = `chart_${fieldCounter++}`;
                 const html = `
                     <div class="mb-3 col-md-12 dynamic-field" data-field-id="${fieldId}">
-                        <label>Graph Chart Input</label>
+                        <label>Graph Chart Title</label>
+                        <input type="text" class="form-control mb-1" name="contents[${fieldId}][title]" value="" placeholder="Section Title">
+                        
                         <div class="mb-2">
                             <label for="chart_type_${fieldId}">Chart Type <span class="text-danger">*</span></label>
                             <select class="form-control" name="contents[${fieldId}][data][chart_type]" id="chart_type_${fieldId}" required>
                                 <option value="">Select Chart Type</option>
                                 <option value="line">Line Chart</option>
-                                <option value="bar">Bar Chart</option>
+                                <option value="bar">Single Bar Chart</option>
+                                <option value="bar_distributed">Distributed Bar Chart</option>
                                 <option value="column">Column Chart</option>
                                 <option value="area">Area Chart</option>
                                 <option value="pie">Pie Chart</option>
                             </select>
                         </div>
+
                         <div class="table-responsive">
                             <table class="table table-bordered" id="${fieldId}">
                                 <thead>
@@ -220,11 +228,13 @@
                                 </tbody>
                             </table>
                         </div>
+
                         <button type="button" class="btn btn-primary btn-sm mt-2 add-row" data-table-id="${fieldId}">Add Row</button>
                         <button type="button" class="btn btn-primary btn-sm mt-2 add-series" data-table-id="${fieldId}">Add Series</button>
                         <button type="button" class="btn btn-danger btn-sm mt-2 remove-field">Remove Chart</button>
                         <input type="hidden" name="contents[${fieldId}][content_type]" value="graph">
                     </div>`;
+
                 document.getElementById('dynamic_fields').insertAdjacentHTML('beforeend', html);
 
                 // Initialize chart table controls

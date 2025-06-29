@@ -46,6 +46,10 @@
 
                         <div class="post-content">
                             @foreach ($post->contents as $index => $content)
+                                @if ($content->title)
+                                    <h5 class="fw-semibold">{{ $content->title ?? "" }}</h5>
+                                @endif
+
                                 @if ($content->content_type === 'text')
                                     <div class="text-content mb-4">
                                         {!! json_decode($content->data, true) !!}
@@ -56,51 +60,90 @@
                                             <canvas id="chart-{{ $index }}"></canvas>
                                         </div>
                                     </div>
-
+                                    
+                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function() {
                                             const ctx = document.getElementById('chart-{{ $index }}').getContext('2d');
                                             const chartData = @json(json_decode($content->data));
-                                            const chartTypeRaw = chartData.chart_type || 'bar'; // Fallback to 'bar'
-                                            // Map chart types: column -> bar, area -> line with fill
+                                            const chartTypeRaw = chartData.chart_type || 'bar'; //also has bar_distributed
                                             const chartType = chartTypeRaw === 'column' ? 'bar' : chartTypeRaw === 'area' ? 'line' : chartTypeRaw;
-                                            const isFilled = chartTypeRaw === 'area'; // Enable fill for area charts
-                                            const isAreaChart = chartTypeRaw === 'area'; // For area-specific settings
+                                            const isFilled = chartTypeRaw === 'area';
+                                            const isAreaChart = chartTypeRaw === 'area';
+                                    
+                                            const defaultPieColors = [
+                                                'rgba(54, 162, 235, 0.8)',
+                                                'rgba(75, 192, 192, 0.8)',
+                                                'rgba(255, 99, 132, 0.8)',
+                                                'rgba(255, 206, 86, 0.8)',
+                                                'rgba(153, 102, 255, 0.8)',
+                                                'rgba(255, 159, 64, 0.8)',
+                                                'rgba(255, 99, 71, 0.8)',
+                                                'rgba(144, 238, 144, 0.8)',
+                                                'rgba(173, 216, 230, 0.8)',
+                                                'rgba(255, 182, 193, 0.8)',
+                                                'rgba(240, 128, 128, 0.8)',
+                                                'rgba(221, 160, 221, 0.8)' 
+                                            ];
+                                    
+                                            const dataWithPercentages = {
+                                                labels: chartData.labels,
+                                                datasets: chartData.series.map((series, i) => {
+                                                    const numLabels = chartData.labels.length;
+                                                    const colors = [];
+                                                    for (let j = 0; j < numLabels; j++) {
+                                                        colors.push(defaultPieColors[j % defaultPieColors.length]);
+                                                    }
+                                                    return {
+                                                        label: series.name,
+                                                        data: series.values.map(value => parseFloat(value)),
+                                                        backgroundColor: chartType === 'pie' || chartType === 'doughnut' 
+                                                            ? series.color ? [series.color] : colors
+                                                            : series.color || `rgba(75, 192, 192, 0.${i + 2})`,
+                                                        borderColor: chartType === 'pie' || chartType === 'doughnut' 
+                                                            ? series.color ? [series.color] : colors
+                                                            : series.color || `rgba(75, 192, 192, 1)`,
+                                                        borderWidth: chartType === 'pie' || chartType === 'doughnut' ? 0 : 1,
+                                                        fill: isFilled
+                                                    };
+                                                })
+                                            };
+                                    
                                             new Chart(ctx, {
                                                 type: chartType,
-                                                data: {
-                                                    labels: chartData.labels,
-                                                    datasets: chartData.series.map((series, i) => ({
-                                                        label: series.name,
-                                                        data: series.values,
-                                                        backgroundColor: series.color || `rgba(75, 192, 192, 0.${i + 2})`,
-                                                        borderColor: series.color || `rgba(75, 192, 192, 1)`,
-                                                        borderWidth: chartType === 'pie' || chartType === 'doughnut' ? 0 : 1,
-                                                        fill: isFilled // Enable fill for area charts
-                                                    }))
-                                                },
+                                                data: dataWithPercentages,
                                                 options: {
                                                     responsive: true,
+                                                    plugins: {
+                                                        legend: {
+                                                            display: true,
+                                                            position: 'bottom'
+                                                        },
+                                                        datalabels: {
+                                                            color: '#000',
+                                                            formatter: (value, ctx) => {
+                                                                const total = ctx.chart.data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                                                                const percentage = ((value / total) * 100).toFixed(2) + '%';
+                                                                return percentage;
+                                                            },
+                                                            font: {
+                                                                weight: 'bold'
+                                                            }
+                                                        }
+                                                    },
                                                     scales: chartType === 'pie' || chartType === 'doughnut' ? {} : {
                                                         y: {
                                                             beginAtZero: true,
-                                                            display: !isAreaChart // Hide y-axis for area charts
+                                                            display: !isAreaChart
                                                         },
                                                         x: {
-                                                            display: !isAreaChart // Hide x-axis for area charts
-                                                        }
-                                                    },
-                                                    plugins: {
-                                                        legend: {
-                                                            display: !isAreaChart && chartType !== 'pie' && chartType !== 'doughnut' // Hide legend for area, pie, doughnut
-                                                        },
-                                                        tooltip: {
-                                                            enabled: !isAreaChart // Disable tooltips for area charts
+                                                            display: !isAreaChart
                                                         }
                                                     },
                                                     elements: {
                                                         line: {
-                                                            tension: isFilled ? 0.4 : 0 // Smoother curves for area charts
+                                                            tension: isFilled ? 0.4 : 0
                                                         }
                                                     }
                                                 }
